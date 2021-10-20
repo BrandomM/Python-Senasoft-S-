@@ -33,8 +33,8 @@ def crop(edged, line_width, x,y,w,h):
 
 
 def remove_white_space(cropped_image):
-    gray = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2GRAY)
-    blur = cv2.GaussianBlur(gray, (25,25), 0)
+    #gray = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2GRAY)
+    blur = cv2.GaussianBlur(cropped_image, (25,25), 0)
     thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
     noise_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
     opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, noise_kernel, iterations=2)
@@ -44,10 +44,11 @@ def remove_white_space(cropped_image):
     x,y,w,h = cv2.boundingRect(coords)
     return cropped_image[y:y+h, x:x+w]
 
-def compare(img1, img2, threshold):
-    rsi1 = cv2.resize(cv2.cvtColor(img1.copy(),cv2.COLOR_BGR2GRAY),(100,100))
-    rsi2 = cv2.resize(cv2.cvtColor(img2.copy(),cv2.COLOR_BGR2GRAY),(100,100))
+def compare(img1, img2):
+    #rsi1 = cv2.resize(cv2.cvtColor(img1.copy(),cv2.COLOR_BGR2GRAY),(100,100))
+    #rsi2 = cv2.resize(cv2.cvtColor(img2.copy(),cv2.COLOR_BGR2GRAY),(100,100))
+    rsi1 = cv2.resize(img1,(100,100))
+    rsi2 = cv2.resize(img2,(100,100))
+    
     value = ssim(rsi1, rsi2)
-    if(value >= threshold):
-        return True 
-    return False
+    return value
