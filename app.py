@@ -1,9 +1,11 @@
 from flask import Flask
 from flask import request
+from flask import jsonify
 import numpy as np
 import cv2
 from skimage.metrics import structural_similarity as ssim
-from image_processor import *
+from signature_processor import *
+from form_validator import *
 
 app = Flask(__name__)
 
@@ -39,28 +41,32 @@ def file():
     return "Las imagenes son diferentes"
 
 @app.route('/compare-signatures', methods=['POST'])
-def compare_signatures():
-    str1 = request.files["img1"].read()
-    str2 = request.files["img2"].read()
+def cosig():
+    str1 = request.files["formulario"].read()
+    str2 = request.files["firma"].read()
+    return "Hola"
 
-    img1 = string_to_img(str1)
-    img2 = string_to_img(str2)
 
-    edged1 = edge(img1)
-    edged2 = edge(img2)
 
-    line_width = 10
-    x1, y1, w1, h1 = get_coords(edged1)
-    x2, y2, w2, h2 = get_coords(edged2)
+@app.route('/validate-form', methods=['POST'])
+def validate_form():
+    str_formulario = request.files["formulario"].read()
+    str_firma = request.files["firma"].read()
 
-    crop1 = crop(edged1, line_width, x1, y1, w1, h1)
-    crop2 = crop(edged2, line_width, x2, y2, w2, h2)
+    similar = compare_signatures(str_formulario, str_firma)
+    firma = "diferente"
+    if(similar):
+        firma = "similar"
 
-    pimg1 = remove_white_space(crop1)
-    pimg2 = remove_white_space(crop2)
+    [tinta, campos] = predict_class(str_formulario)
 
-    value = compare(pimg1, pimg2)
+    print(similar)
+    print(tinta)
+    print(campos)
 
-    if(value >= 0.5):
-        return "Las firmas son similares " + str(value)
-    return "Las firmas son diferentes " + str(value)
+    response = {
+        'firma': firma, 
+        'tinta': tinta,
+        'campos': campos}
+
+    return jsonify(response)

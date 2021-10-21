@@ -52,3 +52,25 @@ def compare(img1, img2):
     
     value = ssim(rsi1, rsi2)
     return value
+
+def compare_signatures(str1, str2):
+    
+    img1 = string_to_img(str1)
+    img2 = string_to_img(str2)
+
+    edged1 = edge(img1)
+    edged2 = edge(img2)
+
+    line_width = 10
+    x1, y1, w1, h1 = get_coords(edged1)
+    x2, y2, w2, h2 = get_coords(edged2)
+
+    crop1 = crop(edged1, line_width, x1, y1, w1, h1)
+    crop2 = crop(edged2, line_width, x2, y2, w2, h2)
+
+    pimg1 = remove_white_space(crop1)
+    pimg2 = remove_white_space(crop2)
+
+    value = compare(pimg1, pimg2)
+
+    return value >= 0.5
